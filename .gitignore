@@ -34,5 +34,10 @@ diagnostics/
 .DS_Store
 Thumbs.db
 
+# Local diagnostic and troubleshooting scripts (not part of the lab)
+kafka-setup-diag.sh
+ops-*.ps1
+ops-*.sh
+
 # Docker compose override
 docker-compose.override.yml

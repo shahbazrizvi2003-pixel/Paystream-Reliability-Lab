@@ -83,9 +83,11 @@ rm -f "$EXT_FILE"
 openssl pkcs12 -export -in "$CRT" -inkey "$KEY" -certfile "$CA_DIR/ca.crt" \
   -name "$NAME" -out "$P12" -passout "pass:$STORE_PASSWORD" >/dev/null 2>&1
 
-openssl pkcs12 -export -nokeys -in "$CA_DIR/ca.crt" \
-  -name "paystream-lab-ca" -out "$TRUSTSTORE" \
-  -passout "pass:$STORE_PASSWORD" >/dev/null 2>&1
+rm -f "$TRUSTSTORE"
+# Same keytool-not-openssl rule as gen-ca.sh (Java TrustedCertEntry).
+keytool -importcert -alias paystream-lab-ca -file "$CA_DIR/ca.crt" \
+  -keystore "$TRUSTSTORE" -storetype PKCS12 \
+  -storepass "$STORE_PASSWORD" -noprompt >/dev/null 2>&1
 
 # Client properties for host-side mTLS tooling and the container healthcheck.
 # In-container keystore paths are normalized by the security overlay mounts.

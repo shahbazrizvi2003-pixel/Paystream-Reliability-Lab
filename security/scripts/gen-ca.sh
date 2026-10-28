@@ -59,6 +59,7 @@ mkdir -p "$CA_DIR"
 if [ "$FORCE" -eq 1 ]; then
   rm -f "$CA_DIR/ca.key" "$CA_DIR/ca.crt" "$CA_DIR/ca.srl" "$CA_DIR/truststore.p12"
 fi
+rm -f "$CA_DIR/truststore.p12"
 
 openssl req -x509 -newkey rsa:2048 -nodes \
   -keyout "$CA_DIR/ca.key" -out "$CA_DIR/ca.crt" \
@@ -69,9 +70,14 @@ openssl req -x509 -newkey rsa:2048 -nodes \
   -addext "subjectKeyIdentifier=hash" \
   >/dev/null 2>&1
 
-openssl pkcs12 -export -nokeys -in "$CA_DIR/ca.crt" \
-  -name "paystream-lab-ca" -out "$CA_DIR/truststore.p12" \
-  -passout "pass:$STORE_PASSWORD" >/dev/null 2>&1
+# Build the truststore with keytool, NOT openssl pkcs12: JDK's PKCS12 parser
+# counts a store assembled from openssl cert bags as 0 entries (no Java
+# TrustedCertEntry marking), which makes every TLS client fail with
+# "the trustAnchors parameter must be non-empty" (seen on the first secured
+# run 2026-10-28). keytool writes proper trusted entries.
+keytool -importcert -alias paystream-lab-ca -file "$CA_DIR/ca.crt" \
+  -keystore "$CA_DIR/truststore.p12" -storetype PKCS12 \
+  -storepass "$STORE_PASSWORD" -noprompt >/dev/null 2>&1
 
 echo "CA created:"
 echo "  cert:        $CA_DIR/ca.crt"

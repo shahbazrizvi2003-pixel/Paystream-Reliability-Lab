@@ -20,6 +20,10 @@ x-broker-common: &broker-common
     KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
     KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:19092
     KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xmx1g -Xms1g}
+    # Log dirs MUST be the mounted volume: without this the image defaults to
+    # /tmp/kafka-logs (container FS) and every container recreation loses all
+    # topic data despite paystream_kafka-N-data being mounted (seen 2026-10-28).
+    KAFKA_LOG_DIRS: /var/lib/kafka/data
     # --- Document 03 section 5.1 broker baselines (all environments) ---
     KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
     KAFKA_DEFAULT_REPLICATION_FACTOR: 3

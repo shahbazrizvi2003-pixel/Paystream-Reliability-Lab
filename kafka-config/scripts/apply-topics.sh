@@ -9,6 +9,9 @@ COMPOSE_FILE="infra/compose/docker-compose.yml"
 ENV_FILE=".env"
 BROKER="kafka-1"
 BOOTSTRAP="localhost:29092"
+# The Apache Kafka 4.0 image doesn't put the CLI on $PATH; commands generated
+# below run inside the broker (or kafka-setup) container, so use absolute paths.
+KAFKA_BIN="${KAFKA_BIN:-/opt/kafka/bin}"
 COMMAND_CONFIG=""
 DIRECT=0
 
@@ -46,6 +49,11 @@ done
 
 cd "$REPO_ROOT"
 
+# Git Bash (MSYS2) rewrites POSIX-looking args of native executables, turning
+# "$KAFKA_BIN/kafka-topics.sh" into "C:/Program Files/Git/opt/kafka/..." at the
+# docker call site. Docker ignores this variable on other platforms.
+export MSYS_NO_PATHCONV=1
+
 # topics.yaml uses a small, regular subset of YAML; parse with an embedded
 # python script to avoid a PyYAML dependency on the host. Windows ships a
 # non-functional python3 alias, so verify execution, not just presence.
@@ -60,10 +68,10 @@ if [ -z "$PYTHON" ]; then
   echo "ERROR: no working python found in PATH" >&2
   exit 1
 fi
-CMDS="$("$PYTHON" - "$REPO_ROOT/kafka-config/topics.yaml" "localhost:29092" <<'PY'
+CMDS="$("$PYTHON" - kafka-config/topics.yaml "$BOOTSTRAP" "$KAFKA_BIN" <<'PY' | tr -d '\r'
 import sys, re
 
-path, bootstrap = sys.argv[1], sys.argv[2]
+path, bootstrap, kafka_bin = sys.argv[1], sys.argv[2], sys.argv[3]
 topics = []
 current = None
 in_config = False
@@ -94,7 +102,7 @@ with open(path, encoding="utf-8") as fh:
 for t in topics:
     if t["name"] is None or t["partitions"] is None or t["rf"] is None:
         sys.exit(f"incomplete topic entry: {t}")
-    cmd = (f"kafka-topics.sh --bootstrap-server {bootstrap} --create --if-not-exists "
+    cmd = (f"{kafka_bin}/kafka-topics.sh --bootstrap-server {bootstrap} --create --if-not-exists "
            f"--topic {t['name']} --partitions {t['partitions']} "
            f"--replication-factor {t['rf']}")
     for c in t["config"]:
@@ -119,15 +127,17 @@ run_kafka_cmd() {
   if [ "$DIRECT" -eq 1 ]; then
     $1
   else
-    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T "$BROKER" $1
+    # </dev/null: docker compose exec -T otherwise drains the caller's stdin
+    # and swallows the remaining commands in the `while read` loop below.
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T "$BROKER" $1 </dev/null
   fi
 }
 
 echo "Applying topics to $BROKER ($BOOTSTRAP)..."
 echo "$CMDS" | while IFS= read -r cmd; do
-  echo "  + ${cmd#kafka-topics.sh }"
+  echo "  + ${cmd#*kafka-topics.sh }"
   run_kafka_cmd "$cmd $AUTH_ARGS"
 done
 
 echo "Current topics in cluster:"
-run_kafka_cmd "kafka-topics.sh --bootstrap-server $BOOTSTRAP --list"
+run_kafka_cmd "$KAFKA_BIN/kafka-topics.sh --bootstrap-server $BOOTSTRAP --list"
