@@ -10,6 +10,9 @@ COMPOSE_FILE="infra/compose/docker-compose.yml"
 ENV_FILE=".env"
 BROKER="kafka-1"
 BOOTSTRAP="localhost:29092"
+# The Apache Kafka 4.0 image doesn't put the CLI on $PATH; commands generated
+# below run inside the broker (or kafka-setup) container, so use absolute paths.
+KAFKA_BIN="${KAFKA_BIN:-/opt/kafka/bin}"
 COMMAND_CONFIG=""
 DIRECT=0
 
@@ -46,6 +49,11 @@ done
 
 cd "$REPO_ROOT"
 
+# Git Bash (MSYS2) rewrites POSIX-looking args of native executables, turning
+# "$KAFKA_BIN/kafka-acls.sh" into "C:/Program Files/Git/opt/kafka/..." at the
+# docker call site. Docker ignores this variable on other platforms.
+export MSYS_NO_PATHCONV=1
+
 PYTHON=""
 for cand in python3 python; do
   if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "import sys" >/dev/null 2>&1; then
@@ -58,10 +66,10 @@ if [ -z "$PYTHON" ]; then
   exit 1
 fi
 
-CMDS="$("$PYTHON" - "$REPO_ROOT/kafka-config/acls.yaml" "$BOOTSTRAP" <<'PY'
+CMDS="$("$PYTHON" - kafka-config/acls.yaml "$BOOTSTRAP" "$KAFKA_BIN" <<'PY' | tr -d '\r'
 import sys
 
-path, bootstrap = sys.argv[1], sys.argv[2]
+path, bootstrap, kafka_bin = sys.argv[1], sys.argv[2], sys.argv[3]
 acls = []
 current = None
 in_resource = False
@@ -100,7 +108,7 @@ flag_for_type = {"topic": "--topic", "group": "--group",
 for a in acls:
     if not all(a[k] for k in ("principal", "type", "name")) or not a["ops"]:
         sys.exit(f"incomplete ACL entry: {a}")
-    cmd = f"kafka-acls.sh --bootstrap-server {bootstrap}"
+    cmd = f"{kafka_bin}/kafka-acls.sh --bootstrap-server {bootstrap}"
     if a["pattern"] == "prefixed":
         cmd += f" {flag_for_type[a['type']]} prefixed:{a['name']}"
     elif a["type"] == "cluster":
@@ -128,15 +136,17 @@ run_kafka_cmd() {
   if [ "$DIRECT" -eq 1 ]; then
     $1
   else
-    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T "$BROKER" $1
+    # </dev/null: docker compose exec -T otherwise drains the caller's stdin
+    # and swallows the remaining commands in the `while read` loop below.
+    docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T "$BROKER" $1 </dev/null
   fi
 }
 
 echo "Applying ACLs to $BROKER ($BOOTSTRAP)..."
 echo "$CMDS" | while IFS= read -r cmd; do
-  echo "  + ${cmd#kafka-acls.sh }"
+  echo "  + ${cmd#*kafka-acls.sh }"
   run_kafka_cmd "$cmd $AUTH_ARGS"
 done
 
 echo "Current ACLs in cluster:"
-run_kafka_cmd "kafka-acls.sh --bootstrap-server $BOOTSTRAP $AUTH_ARGS --list"
+run_kafka_cmd "$KAFKA_BIN/kafka-acls.sh --bootstrap-server $BOOTSTRAP $AUTH_ARGS --list"

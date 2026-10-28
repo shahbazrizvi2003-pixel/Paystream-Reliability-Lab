@@ -10,6 +10,9 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ENV_FILE=".env"
 BROKER="kafka-1"
 BOOTSTRAP="localhost:29092"
+# The Apache Kafka 4.0 image doesn't put the CLI on $PATH (same issue that
+# smoke-test.sh fixes); always call scripts via /opt/kafka/bin in-container.
+KAFKA_BIN="${KAFKA_BIN:-/opt/kafka/bin}"
 
 usage() {
   cat <<'EOF'
@@ -35,12 +38,31 @@ done
 
 cd "$REPO_ROOT"
 
+# Git Bash (MSYS2) rewrites POSIX-looking args of native executables, turning
+# "$KAFKA_BIN/kafka-topics.sh" into "C:/Program Files/Git/opt/kafka/..." at the
+# docker call site. Docker ignores this variable on other platforms.
+export MSYS_NO_PATHCONV=1
+
+# Same python discovery as apply-topics.sh: Windows ships a non-functional
+# python3 alias, so verify execution, not just presence.
+PYTHON=""
+for cand in python3 python; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "import sys" >/dev/null 2>&1; then
+    PYTHON="$cand"
+    break
+  fi
+done
+if [ -z "$PYTHON" ]; then
+  echo "ERROR: no working python found in PATH" >&2
+  exit 1
+fi
+
 kafka_cmd() {
   docker compose --env-file "$ENV_FILE" -f infra/compose/docker-compose.yml exec -T "$BROKER" "$@"
 }
 
 # ---- declared topics ---------------------------------------------------------
-DECLARED_TOPICS="$(python - kafka-config/topics.yaml <<'PY'
+DECLARED_TOPICS="$("$PYTHON" - kafka-config/topics.yaml <<'PY' | tr -d '\r'
 import sys, re
 names = []
 with open(sys.argv[1], encoding="utf-8") as fh:
@@ -52,7 +74,7 @@ print("\n".join(sorted(names)))
 PY
 )"
 
-LIVE_TOPICS="$(kafka_cmd kafka-topics.sh --bootstrap-server "$BOOTSTRAP" --list | sort)"
+LIVE_TOPICS="$(kafka_cmd "$KAFKA_BIN/kafka-topics.sh" --bootstrap-server "$BOOTSTRAP" --list | sort)"
 
 DRIFT=0
 echo "== topic drift =="
@@ -75,7 +97,7 @@ done
 
 # ---- declared ACLs (principals + resource names present) ---------------------
 echo "== ACL drift =="
-DECLARED_ACLS="$(python - kafka-config/acls.yaml <<'PY'
+DECLARED_ACLS="$("$PYTHON" - kafka-config/acls.yaml <<'PY' | tr -d '\r'
 import sys, re
 pairs = []
 principal = None
@@ -103,7 +125,7 @@ print("\n".join(sorted(pairs)))
 PY
 )"
 
-LIVE_ACLS="$(kafka_cmd kafka-acls.sh --bootstrap-server "$BOOTSTRAP" --list \
+LIVE_ACLS="$(kafka_cmd "$KAFKA_BIN/kafka-acls.sh" --bootstrap-server "$BOOTSTRAP" --list \
   | grep -E 'principal=User:' | sed 's/\s\+/ /g' | sort || true)"
 
 for a in $DECLARED_ACLS; do
