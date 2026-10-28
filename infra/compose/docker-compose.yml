@@ -124,8 +124,8 @@ services:
 
   txn-producer:
     build:
-      context: ../../services
-      dockerfile: txn-producer/Dockerfile
+      context: ../..
+      dockerfile: services/txn-producer/Dockerfile
     image: ${TXN_PRODUCER_IMAGE:-paystream/txn-producer:0.1.0}
     container_name: txn-producer
     restart: unless-stopped
@@ -151,8 +151,8 @@ services:
 
   fraud-detector:
     build:
-      context: ../../services
-      dockerfile: fraud-detector/Dockerfile
+      context: ../..
+      dockerfile: services/fraud-detector/Dockerfile
     image: ${FRAUD_DETECTOR_IMAGE:-paystream/fraud-detector:0.1.0}
     container_name: fraud-detector
     restart: unless-stopped
@@ -175,8 +175,8 @@ services:
 
   notifier:
     build:
-      context: ../../services
-      dockerfile: notifier/Dockerfile
+      context: ../..
+      dockerfile: services/notifier/Dockerfile
     image: ${NOTIFIER_IMAGE:-paystream/notifier:0.1.0}
     container_name: notifier
     restart: unless-stopped
