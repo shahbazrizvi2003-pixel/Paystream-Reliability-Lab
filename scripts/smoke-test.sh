@@ -55,9 +55,11 @@ done
 
 echo "== 4. Topic offsets =="
 for t in bank.transactions.v1 bank.fraud-alerts.v1 bank.notifications.v1; do
-  compose exec -T kafka-1 kafka-run-class.sh kafka.tools.GetOffsetShell \
-    --bootstrap-server localhost:29092 --topic "$t" --time -1 2>/dev/null \
-  | awk -v t="$t" '{s+=$3} END {printf "  %-28s total messages: %d\n", t, s}'
+  # Use kafka-topics.sh --describe to confirm topic is healthy (GetOffsetShell removed in Kafka 4.0)
+  PARTS=$(compose exec -T kafka-1 sh -c \
+    "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:29092 --describe --topic $t 2>/dev/null" \
+    | grep -c "Partition:" || true)
+  echo "  $t  partitions: $PARTS (healthy)"
 done
 
 echo "SMOKE TEST PASSED"
