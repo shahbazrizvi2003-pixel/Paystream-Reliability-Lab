@@ -101,6 +101,25 @@ write_jaas "txn-producer.env"   "SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG"     "
 write_jaas "fraud-detector.env" "SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG"     "svc-fraud"
 write_jaas "notifier.env"       "SPRING_KAFKA_PROPERTIES_SASL_JAAS_CONFIG"     "svc-notify"
 
+# ---- broker server-side JAAS -------------------------------------------------
+# Even though SCRAM verification reads from the metadata log, Kafka requires a
+# JAAS context for EVERY SASL listener: without a '<listener>.KafkaServer'
+# entry the broker aborts with "Could not find a 'KafkaServer' ... entry in
+# the JAAS configuration" (seen on the 2026-10-28 first secured run). The
+# listener can't express the hyphenated config key via a KAFKA_* env var, so
+# the file is mounted into /etc/kafka/secrets/kafka-server.conf and wired in
+# through KAFKA_OPTS=-Djava.security.auth.login.config=... in the overlay.
+# Identity: svc-admin-ci (the SCRAM admin per ADR-0002). One entry per SASL
+# listener: the file loader looks up '<listener>.KafkaServer' exactly
+# (PLAINTEXT_HOST was added on the 2026-10-28 first secured run).
+{
+  {
+    printf 'plaintext.KafkaServer {\n      '; jaas_line svc-admin-ci "$(password_of svc-admin-ci)"; printf '\n};\n';
+    printf 'plaintext_host.KafkaServer {\n      '; jaas_line svc-admin-ci "$(password_of svc-admin-ci)"; printf '\n};\n';
+  } > "$JAAS_DIR/kafka-server.conf"
+}
+chmod 600 "$JAAS_DIR/kafka-server.conf" 2>/dev/null || true
+
 # POSIX-safe names for compose ${} interpolation (kafka-exporter command).
 {
   printf 'SVC_MONITOR_PASSWORD=%s\n' "$(password_of svc-monitor)"

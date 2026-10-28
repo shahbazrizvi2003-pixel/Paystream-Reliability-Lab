@@ -22,11 +22,15 @@ x-broker-security-env: &broker-security-env
   # --- authorisation: default deny, StandardAuthorizer (KRaft) ---
   KAFKA_AUTHORIZER_CLASS_NAME: org.apache.kafka.metadata.authorizer.StandardAuthorizer
   KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: "false"
-  # broker certs carry CN=broker-N (mTLS inter-broker/controller principals);
-  # kafka-setup is the cert-based bootstrap identity; svc-admin-ci is the
-  # SCRAM admin used by CI and the apply scripts.
-  KAFKA_SUPER_USERS: "User:CN=broker-1;User:CN=broker-2;User:CN=broker-3;User:CN=kafka-setup;User:svc-admin-ci"
-  # --- client authentication: SCRAM-SHA-512 (server side needs no JAAS) ---
+  # broker certs carry full cert-DN principals: CN=broker-N,OU=Brokers,
+  # O=PayStream Lab,C=US (DefaultKafkaPrincipalBuilder uses the subject DN,
+  # NOT just the CN — bare "User:CN=broker-N" never matches, which dead-locks
+  # the KRaft quorum in AuthorizerNotReadyException, seen 2026-10-28);
+  # kafka-setup is the cert-based bootstrap identity (full DN likewise);
+  # svc-admin-ci is the SCRAM admin used by CI and the apply scripts.
+  KAFKA_SUPER_USERS: "User:CN=broker-1,OU=Brokers,O=PayStream Lab,C=US;User:CN=broker-2,OU=Brokers,O=PayStream Lab,C=US;User:CN=broker-3,OU=Brokers,O=PayStream Lab,C=US;User:CN=kafka-setup,OU=Clients,O=PayStream Lab,C=US;User:svc-admin-ci"
+  # --- client authentication: SCRAM-SHA-512; the server-side JAAS entry is
+  #     mandatory too (see KAFKA_OPTS below) ---
   KAFKA_SASL_ENABLED_MECHANISMS: SCRAM-SHA-512
   # --- TLS material: mount targets are identical on every broker, so the
   #     same global ssl.* configs serve all four listeners ---
@@ -39,6 +43,27 @@ x-broker-security-env: &broker-security-env
   KAFKA_LISTENER_NAME_BROKER_SSL_CLIENT_AUTH: required
   KAFKA_LISTENER_NAME_CONTROLLER_SSL_CLIENT_AUTH: required
   KAFKA_LISTENER_NAME_PLAINTEXT_SSL_CLIENT_AUTH: none
+  # Server-side JAAS context for the SASL_SSL PLAINTEXT listener:
+  # even for SCRAM (credentials live in the metadata log), Kafka requires a
+  # JAAS entry ('plaintext.KafkaServer'), wired via KAFKA_OPTS above.
+  KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/secrets/kafka-server.conf"
+  # --- KRaft gotcha (2026-10-28 first secured run): the controller quorum
+  #     channel and the BROKER inter-broker channel are CLIENTS and only read
+  #     listener.name.<listener>.ssl.* keys - they do NOT inherit the global
+  #     ssl.* defaults, so without these the raft handshake fails with
+  #     "trustAnchors parameter must be non-empty". Same material, per listener.
+  KAFKA_LISTENER_NAME_CONTROLLER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/broker.p12
+  KAFKA_LISTENER_NAME_CONTROLLER_SSL_KEYSTORE_TYPE: PKCS12
+  KAFKA_LISTENER_NAME_CONTROLLER_SSL_KEYSTORE_PASSWORD: ${KAFKA_SSL_PASSWORD:-paystream-lab}
+  KAFKA_LISTENER_NAME_CONTROLLER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.p12
+  KAFKA_LISTENER_NAME_CONTROLLER_SSL_TRUSTSTORE_TYPE: PKCS12
+  KAFKA_LISTENER_NAME_CONTROLLER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_SSL_PASSWORD:-paystream-lab}
+  KAFKA_LISTENER_NAME_BROKER_SSL_KEYSTORE_LOCATION: /etc/kafka/secrets/broker.p12
+  KAFKA_LISTENER_NAME_BROKER_SSL_KEYSTORE_TYPE: PKCS12
+  KAFKA_LISTENER_NAME_BROKER_SSL_KEYSTORE_PASSWORD: ${KAFKA_SSL_PASSWORD:-paystream-lab}
+  KAFKA_LISTENER_NAME_BROKER_SSL_TRUSTSTORE_LOCATION: /etc/kafka/secrets/truststore.p12
+  KAFKA_LISTENER_NAME_BROKER_SSL_TRUSTSTORE_TYPE: PKCS12
+  KAFKA_LISTENER_NAME_BROKER_SSL_TRUSTSTORE_PASSWORD: ${KAFKA_SSL_PASSWORD:-paystream-lab}
 
 services:
   kafka-1:
@@ -54,6 +79,7 @@ services:
       - ../../security/certs/broker-1/broker-1.p12:/etc/kafka/secrets/broker.p12:ro
       - ../../security/certs/broker-1/truststore.p12:/etc/kafka/secrets/truststore.p12:ro
       - ../../security/certs/broker-1/command.properties:/etc/kafka/secrets/command.properties:ro
+      - ../../security/secrets/jaas/kafka-server.conf:/etc/kafka/secrets/kafka-server.conf:ro
 
   kafka-2:
     environment:
@@ -65,6 +91,7 @@ services:
       - ../../security/certs/broker-2/broker-2.p12:/etc/kafka/secrets/broker.p12:ro
       - ../../security/certs/broker-2/truststore.p12:/etc/kafka/secrets/truststore.p12:ro
       - ../../security/certs/broker-2/command.properties:/etc/kafka/secrets/command.properties:ro
+      - ../../security/secrets/jaas/kafka-server.conf:/etc/kafka/secrets/kafka-server.conf:ro
 
   kafka-3:
     environment:
@@ -76,6 +103,7 @@ services:
       - ../../security/certs/broker-3/broker-3.p12:/etc/kafka/secrets/broker.p12:ro
       - ../../security/certs/broker-3/truststore.p12:/etc/kafka/secrets/truststore.p12:ro
       - ../../security/certs/broker-3/command.properties:/etc/kafka/secrets/command.properties:ro
+      - ../../security/secrets/jaas/kafka-server.conf:/etc/kafka/secrets/kafka-server.conf:ro
 
   # One-shot bootstrap: registers SCRAM users (as cert principal CN=kafka-setup,
   # a superuser) then applies the ACL matrix and topic catalogue as svc-admin-ci.
