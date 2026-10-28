@@ -41,6 +41,16 @@ public class DlqProcessingExceptionHandler implements ProcessingExceptionHandler
     public void configure(Map<String, ?> configs) {
         Map<String, Object> producerConfigs = new HashMap<>();
         configs.forEach((k, v) -> producerConfigs.put(k, String.valueOf(v)));
+        // bootstrap.servers may be stored as a List by the Streams runtime;
+        // String.valueOf(List) produces "[host:port, ...]" with brackets which
+        // KafkaProducer rejects. Re-extract it from the raw config map.
+        Object rawBootstrap = configs.get("bootstrap.servers");
+        if (rawBootstrap instanceof java.util.List) {
+            producerConfigs.put("bootstrap.servers",
+                    ((java.util.List<?>) rawBootstrap).stream()
+                            .map(Object::toString)
+                            .collect(java.util.stream.Collectors.joining(",")));
+        }
         producerConfigs.put("key.serializer", ByteArraySerializer.class.getName());
         producerConfigs.put("value.serializer", ByteArraySerializer.class.getName());
         producerConfigs.put("acks", "all");
