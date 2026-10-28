@@ -6,6 +6,7 @@ import bank.events.TxnType;
 import com.paystream.common.AccountPool;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
@@ -58,6 +59,7 @@ public class SyntheticTransactionGenerator {
     /** remainder accumulator; only touched by the single scheduler thread */
     private double pendingMessages;
 
+    @Autowired
     public SyntheticTransactionGenerator(KafkaTemplate<String, Transaction> template,
                                          AccountPool accounts,
                                          @Value("${paystream.topics.transactions}") String topic,
