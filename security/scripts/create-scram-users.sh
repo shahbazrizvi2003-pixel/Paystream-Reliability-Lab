@@ -29,7 +29,9 @@ password per principal (git-ignored). Passwords are stable: re-runs reuse
 existing entries so credentials never silently rotate.
 
 --apply registers the credentials on the running cluster via the mTLS-only
-BROKER listener (host port 19094) using the kafka-setup bootstrap identity:
+BROKER listener (host port 19094) using the kafka-setup bootstrap identity
+(Kafka 4.0: --add-scram was removed from kafka-configs.sh, credentials go
+through --add-config per KIP-554):
   kafka-configs --alter --add-scram 'SCRAM-SHA-512=[password=...]'
 
 Principals (Document 03 section 6 + ADR-0006 additions):
@@ -164,9 +166,9 @@ EOF
 apply_user() {
   local principal="$1" password="$2"
   local cmd
-  cmd="kafka-configs.sh --bootstrap-server $BOOTSTRAP_MTLS --command-config $PROPS_FILE --alter --entity-type users --entity-name $principal --add-scram 'SCRAM-SHA-512=[password=$password]'"
+  cmd="kafka-configs.sh --bootstrap-server $BOOTSTRAP_MTLS --command-config $PROPS_FILE --alter --entity-type users --entity-name $principal --add-config 'SCRAM-SHA-512=[password=$password]'"
   if [ "$DRY_RUN" -eq 1 ]; then
-    echo "  + ${cmd%%--add-scram*} --add-scram 'SCRAM-SHA-512=[password=***]'"
+    echo "  + ${cmd%%--add-config*} --add-config 'SCRAM-SHA-512=[password=***]'"
   else
     eval "$cmd"
     echo "  + registered $principal"
