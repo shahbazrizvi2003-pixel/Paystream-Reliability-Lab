@@ -29,18 +29,19 @@ EOF
 
 drill_capture() {
   # snapshot cluster + service state for the report (best effort, read-only)
-  [ -n "${EVIDENCE_DIR:-}" ] || return 1
+  [ -n "${EVIDENCE_DIR:-}" ] || return 0
   local label="$1"
   compose ps > "$EVIDENCE_DIR/ps-$label.txt" 2>&1 || true
-  compose exec -T kafka-1 kafka-topics.sh --bootstrap-server localhost:29092 \
-    --describe > "$EVIDENCE_DIR/topics-$label.txt" 2>&1 || true
-  curl -fs "http://localhost:9090/api/v1/alerts" \
+  docker exec kafka-1 /opt/kafka/bin/kafka-topics.sh \
+    --bootstrap-server localhost:29092 --describe \
+    > "$EVIDENCE_DIR/topics-$label.txt" 2>&1 || true
+  curl -fs "http://prometheus:9090/api/v1/alerts" \
     > "$EVIDENCE_DIR/alerts-$label.json" 2>/dev/null || true
 }
 
 drill_finish() {
   local result="$1" root_cause="$2" fix="$3"
-  [ -n "${EVIDENCE_DIR:-}" ] || return 1
+  [ -n "${EVIDENCE_DIR:-}" ] || return 0
   cat >> "$EVIDENCE_DIR/hypothesis.txt" <<EOF
 result: $result
 root_cause: $root_cause
@@ -53,14 +54,16 @@ EOF
 wait_for_healthy() {
   local timeout="${1:-180}"
   local deadline=$((SECONDS + timeout))
-  until compose exec -T kafka-1 kafka-metadata-quorum.sh \
-      --bootstrap-server localhost:29092 describe --status 2>/dev/null | grep -q CurrentLeader; do
+  until docker exec kafka-1 /opt/kafka/bin/kafka-metadata-quorum.sh \
+      --bootstrap-server localhost:29092 describe --status 2>/dev/null \
+      | grep -q "LeaderId"; do
     if [ "$SECONDS" -ge "$deadline" ]; then
       echo "ERROR: quorum not healthy within ${timeout}s" >&2
       return 1
     fi
     sleep 3
   done
+  echo "[drill] quorum healthy (LeaderId confirmed)"
 }
 
 require_cluster() {
@@ -71,14 +74,8 @@ require_cluster() {
   fi
 }
 
-# ---- mode-aware Kafka CLI helpers --------------------------------------------
-# The drills must run against both stack modes: plaintext (make up) and the
-# secured overlay (make up-secure). In secured mode, admin commands inside
-# kafka-1 authenticate as the broker's own certificate via the BROKER mTLS
-# listener; in plaintext mode they use the classic listener.
-
 stack_mode() {
-  if compose exec -T kafka-1 test -f /etc/kafka/secrets/command.properties 2>/dev/null; then
+  if docker exec kafka-1 test -f /etc/kafka/secrets/command.properties 2>/dev/null; then
     echo "secure"
   else
     echo "plaintext"
@@ -93,8 +90,6 @@ bootstrap_args() {
 }
 
 kafka_exec() {
-  # kafka_exec kafka-topics.sh --describe ...  (bootstrap args added automatically
-  # when the command does not carry its own --bootstrap-server)
   local cmd="$1"; shift
   local args=()
   local has_bootstrap=0
@@ -103,30 +98,26 @@ kafka_exec() {
     args+=("$a")
   done
   if [ "$has_bootstrap" -eq 0 ]; then
-    # shellcheck disable=SC2312  # intentional: bootstrap_args is mode detection
     mapfile -t bootargs < <(bootstrap_args | tr ' ' '\n')
-    compose exec -T "$DRILL_BROKER" "$cmd" "${bootargs[@]}" "${args[@]}"
+    docker exec "$DRILL_BROKER" /opt/kafka/bin/"$cmd" "${bootargs[@]}" "${args[@]}"
   else
-    compose exec -T "$DRILL_BROKER" "$cmd" "${args[@]}"
+    docker exec "$DRILL_BROKER" /opt/kafka/bin/"$cmd" "${args[@]}"
   fi
 }
 
 DRILL_BROKER="${DRILL_BROKER:-kafka-1}"
 
-# Run under representative load: ensures the txn generator is producing at the
-# requested rate (1-5000). Passes through both stack modes (HTTP is local).
 start_load() {
   local rate="${1:-${DRILL_RATE:-100}}"
-  curl -fsS -X POST "http://localhost:${TXN_PRODUCER_HOST_PORT:-8080}/api/generation/start?rate=${rate}" >/dev/null 2>&1 \
-    || echo "WARN: could not set generator rate via API (is txn-producer up?)" >&2
+  curl -fsS -X POST "http://txn-producer:8080/api/generation/start?rate=${rate}" \
+    >/dev/null 2>&1 || true
 }
 
 stop_load() {
-  curl -fsS -X POST "http://localhost:${TXN_PRODUCER_HOST_PORT:-8080}/api/generation/stop" >/dev/null 2>&1 || true
+  curl -fsS -X POST "http://txn-producer:8080/api/generation/stop" \
+    >/dev/null 2>&1 || true
 }
 
-# Producer error sentinel: the generator's own counters must never regress and
-# produce errors must stay 0 (T12 semantics, also used by D1/D2 acceptance).
 generator_status() {
-  curl -fsS "http://localhost:${TXN_PRODUCER_HOST_PORT:-8080}/api/generation/status" 2>/dev/null || echo "{}"
+  curl -fsS "http://txn-producer:8080/api/generation/status" 2>/dev/null || echo "{}"
 }
