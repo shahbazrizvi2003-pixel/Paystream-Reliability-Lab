@@ -1,0 +1,1 @@
+host: Linux / x86_64, stages: 1000 2500 5000
