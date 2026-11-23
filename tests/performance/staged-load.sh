@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 # T10/T14 - staged throughput test (WP2.9, FR-04).
-# Runs kafka-producer-perf-test and kafka-consumer-perf-test at 1,000 / 2,500
-# / 5,000 msg/s stages, records p99 latency and throughput per stage, and
-# identifies where the ceiling or bottleneck appears. Output lands in
-# docs/performance/results/ for consolidation into docs/performance/baseline.md.
-# Usage: tests/performance/staged-load.sh [--help] [--stages 1000,2500,5000]
-set -euo pipefail
+# Runs kafka-producer-perf-test at 1,000 / 2,500 / 5,000 msg/s stages,
+# records p99 latency and throughput per stage.
+set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 STAGES="${STAGED_STAGES:-1000 2500 5000}"
@@ -15,11 +12,10 @@ TOPIC="bank.transactions.v1"
 
 usage() {
   cat <<'EOF'
-T10 - staged producer/consumer perf test at configurable msg/s stages
-
+T10 - staged producer perf test at configurable msg/s stages
 Options:
   -h, --help      Show this help.
-  --stages LIST   Quoted, space-separated msg/s stages (default: "1000 2500 5000").
+  --stages LIST   Space-separated msg/s stages (default: "1000 2500 5000").
 EOF
 }
 
@@ -36,31 +32,33 @@ RESULTS_DIR="docs/performance/results"
 mkdir -p "$RESULTS_DIR"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 
-compose() {
-  docker compose --env-file .env -f infra/compose/docker-compose.yml "$@"
-}
-
 echo "== T10 staged load - $(date -u) =="
 echo "host: $(uname -s) / $(uname -m), stages: $STAGES" | tee "$RESULTS_DIR/staged-$STAMP.txt"
 
-# stop the app generator so perf-test traffic is the only traffic
-curl -fsS -X POST "http://localhost:${TXN_PRODUCER_HOST_PORT:-8080}/api/generation/stop" >/dev/null 2>&1 || true
+# stop the app generator so perf-test traffic is the only load
+curl -fsS -X POST "http://txn-producer:8080/api/generation/stop" >/dev/null 2>&1 || true
 
 for rate in $STAGES; do
   echo "-- stage ${rate} msg/s (${DURATION}s)..."
-  compose exec -T kafka-1 kafka-producer-perf-test.sh \
-    --topic "$TOPIC" --num-records $((rate * DURATION)) \
-    --record-size "$RECORD_SIZE" --throughput "$rate" \
+  docker exec kafka-1 /opt/kafka/bin/kafka-producer-perf-test.sh \
+    --topic "$TOPIC" \
+    --num-records $((rate * DURATION)) \
+    --record-size "$RECORD_SIZE" \
+    --throughput "$rate" \
     --producer-props bootstrap.servers=localhost:29092 \
       acks=all enable.idempotence=true compression.type=lz4 linger.ms=10 \
     2>&1 | tee "$RESULTS_DIR/producer-${rate}-$STAMP.txt"
 
-  echo "-- consumer catch-up measurement for stage ${rate}..."
-  compose exec -T kafka-1 kafka-consumer-perf-test.sh \
-    --bootstrap-server localhost:29092 --topic "$TOPIC" \
-    --messages $((rate * DURATION)) --timeout 120000 \
-    2>&1 | tail -2 | tee "$RESULTS_DIR/consumer-${rate}-$STAMP.txt"
+  echo "-- consumer catch-up for stage ${rate}..."
+  docker exec kafka-1 /opt/kafka/bin/kafka-consumer-perf-test.sh \
+    --bootstrap-server localhost:29092 \
+    --topic "$TOPIC" \
+    --messages $((rate * DURATION)) \
+    --timeout 120000 \
+    2>&1 | tail -3 | tee "$RESULTS_DIR/consumer-${rate}-$STAMP.txt"
+
+  echo ""
 done
 
-echo "Done. Consolidate p99/throughput per stage into docs/performance/baseline.md"
-echo "(results: $RESULTS_DIR/*-$STAMP.txt)"
+echo "== T10 done. Results in $RESULTS_DIR/ =="
+cat "$RESULTS_DIR/staged-$STAMP.txt"
