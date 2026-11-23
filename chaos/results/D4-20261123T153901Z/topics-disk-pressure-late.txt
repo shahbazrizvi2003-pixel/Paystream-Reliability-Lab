@@ -1,0 +1,129 @@
+Topic: pg.public.accounts	TopicId: RkAodrbCRE-L_XZEdoixiw	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=compact,unclean.leader.election.enable=false
+	Topic: pg.public.accounts	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: pg.public.accounts	Partition: 1	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: pg.public.accounts	Partition: 2	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.transactions.v1.retry	TopicId: QJcr5E9LTPeIsQ08BDYDGw	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=86400000,unclean.leader.election.enable=false
+	Topic: bank.transactions.v1.retry	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1.retry	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1.retry	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: connect-configs	TopicId: Sk3WTpECRPqS21TYZ0qFxQ	PartitionCount: 1	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=compact,unclean.leader.election.enable=false
+	Topic: connect-configs	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.notifications.v1	TopicId: hIopJlsWTGCXqYKX-n6Z9A	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=259200000,unclean.leader.election.enable=false
+	Topic: bank.notifications.v1	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.notifications.v1	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.notifications.v1	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: _schemas	TopicId: wVbIB4y_RrmvoicvcBM1YQ	PartitionCount: 1	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=compact,unclean.leader.election.enable=false
+	Topic: _schemas	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: fraud-detector-account-txn-window-changelog	TopicId: tEoMmUbNQaa3SHtXAhadzg	PartitionCount: 6	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=compact,message.timestamp.type=CreateTime,unclean.leader.election.enable=false
+	Topic: fraud-detector-account-txn-window-changelog	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: fraud-detector-account-txn-window-changelog	Partition: 1	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: fraud-detector-account-txn-window-changelog	Partition: 2	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: fraud-detector-account-txn-window-changelog	Partition: 3	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: fraud-detector-account-txn-window-changelog	Partition: 4	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: fraud-detector-account-txn-window-changelog	Partition: 5	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: connect-offsets	TopicId: 6cK-S9MXQqaq8Qyh-SOFkw	PartitionCount: 25	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=compact,unclean.leader.election.enable=false
+	Topic: connect-offsets	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 3	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 4	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 5	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 6	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 7	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 8	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 9	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 10	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 11	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 12	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 13	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 14	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 15	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 16	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 17	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 18	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 19	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 20	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 21	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 22	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 23	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-offsets	Partition: 24	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.fraud-alerts.v1.dlq	TopicId: ysRwiEr3RSCH-UyoI0Iqdg	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=1209600000,unclean.leader.election.enable=false
+	Topic: bank.fraud-alerts.v1.dlq	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.fraud-alerts.v1.dlq	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.fraud-alerts.v1.dlq	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.transactions.v1.dlq	TopicId: zoDOo81eRH2UkpuF1kMhmA	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=1209600000,unclean.leader.election.enable=false
+	Topic: bank.transactions.v1.dlq	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1.dlq	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1.dlq	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.fraud-alerts.v1.retry	TopicId: cDAvWElBT1mO85sGjpG5Gw	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=86400000,unclean.leader.election.enable=false
+	Topic: bank.fraud-alerts.v1.retry	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.fraud-alerts.v1.retry	Partition: 1	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.fraud-alerts.v1.retry	Partition: 2	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.fraud-alerts.v1	TopicId: _dKjILw7RSeqhDhwvdnWGg	PartitionCount: 3	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=2592000000,unclean.leader.election.enable=false
+	Topic: bank.fraud-alerts.v1	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.fraud-alerts.v1	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.fraud-alerts.v1	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: connect-status	TopicId: omJAbM7ASAezzQKydmw0tw	PartitionCount: 5	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=compact,unclean.leader.election.enable=false
+	Topic: connect-status	Partition: 0	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-status	Partition: 1	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-status	Partition: 2	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-status	Partition: 3	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: connect-status	Partition: 4	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: __consumer_offsets	TopicId: ZvTLIBQNQF6Q3lc60KwJoQ	PartitionCount: 50	ReplicationFactor: 3	Configs: compression.type=producer,min.insync.replicas=2,cleanup.policy=compact,segment.bytes=104857600,unclean.leader.election.enable=false
+	Topic: __consumer_offsets	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 1	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 2	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 3	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 4	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 5	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 6	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 7	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 8	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 9	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 10	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 11	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 12	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 13	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 14	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 15	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 16	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 17	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 18	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 19	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 20	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 21	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 22	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 23	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 24	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 25	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 26	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 27	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 28	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 29	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 30	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 31	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 32	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 33	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 34	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 35	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 36	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 37	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 38	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 39	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 40	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 41	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 42	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 43	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 44	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 45	Leader: 3	Replicas: 3,2,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 46	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 47	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 48	Leader: 2	Replicas: 2,1,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: __consumer_offsets	Partition: 49	Leader: 1	Replicas: 1,3,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+Topic: bank.transactions.v1	TopicId: e84ik6cgS1OYYqzsbmjqNg	PartitionCount: 6	ReplicationFactor: 3	Configs: min.insync.replicas=2,cleanup.policy=delete,retention.ms=604800000,unclean.leader.election.enable=false
+	Topic: bank.transactions.v1	Partition: 0	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1	Partition: 1	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1	Partition: 2	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1	Partition: 3	Leader: 3	Replicas: 3,1,2	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1	Partition: 4	Leader: 1	Replicas: 1,2,3	Isr: 1,2,3	Elr: 	LastKnownElr: 
+	Topic: bank.transactions.v1	Partition: 5	Leader: 2	Replicas: 2,3,1	Isr: 1,2,3	Elr: 	LastKnownElr: 

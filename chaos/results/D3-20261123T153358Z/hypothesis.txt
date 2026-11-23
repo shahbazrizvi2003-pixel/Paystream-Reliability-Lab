@@ -1,0 +1,8 @@
+drill: D3
+started: 20261123T153358Z
+hypothesis: rebalance storms grow lag but cooperative assignment bounds the damage; lag drains after membership stabilises
+host: Linux / x86_64
+result: PASS-expected
+root_cause: lag spiked during churn; cooperative rebalancing avoided stop-the-world revokes; lag drained after stabilisation
+fix: runbook: docs/runbooks/consumer-lag.md; alert ConsumerLagHigh fired during the spike
+finished: 20261123T153900Z

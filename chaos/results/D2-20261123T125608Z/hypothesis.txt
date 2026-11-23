@@ -1,0 +1,8 @@
+drill: D2
+started: 20261123T125608Z
+hypothesis: two brokers down: acks=all producers block by design (min ISR 2); consumers on remaining leaders continue; ordered recovery restores full ISR
+host: Linux / x86_64
+result: PASS-expected
+root_cause: write outage is the designed durability trade-off; unclean leader election stayed disabled
+fix: recovery runbook: docs/runbooks/isr-shrink.md; alert KafkaPartitionIsrBelowMinIsr fired
+finished: 20261123T125905Z

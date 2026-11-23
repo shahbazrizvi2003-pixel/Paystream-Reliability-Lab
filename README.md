@@ -102,30 +102,17 @@ make validate-config # lint topics/ACLs/schemas/connect/security/monitoring
 |---|---|---|
 | 0 — Prototype | Environment baseline (P0) recorded in `.env.example` heaps | ✅ recorded 2026-10-06 |
 | 1 — MVP | Cluster, 3 services, amount rule, minimal dashboards, CI | ✅ 2026-10-06 (22 tests) |
-| 2 — Final | Security, hardening, CDC, full observability, config-as-code authored 2026-10-07; drills D1–D6 execution + upgrade/perf evidence pending Docker | 🚧 authored, runtime-verification pending |
+| 2 — Final | Security, hardening, CDC, full observability, config-as-code; drills D1–D6 executed twice with evidence 2026-11-23; rolling upgrade T12 PASS x2; T10 performance baseline measured | ✅ 2026-11-23 |
 | 3 — Commercial-ready | K8s, IaC, DR, SLOs (optional, time-boxed) | ⬜ planned |
 
 ## Known limitations
 
-Honest list, reviewed at every stage gate (G2 requires it):
-
-- **Docker is not installed on the reference workstation** (deliberate
-  uninstall). Everything above is authored and unit/config-verified
-  container-free; cluster-runtime verification — `make up-secure`, the six
-  drills executed twice with evidence, upgrade/expansion runs, and the
-  performance/soak baseline — is the next step once Docker Desktop is back.
-- Security overlay (`make up-secure`) is written per ADR-0002 but its
-  runtime handshake behaviour (mTLS controllers, exporter SASL flags) is
-  not yet exercised; expect one calibration pass with Docker available.
-- JMX broker metrics ship as config (`monitoring/jmx/broker.yml`) but the
-  broker javaagent wiring is documented, not enabled — the related alerts
-  activate once wired.
-- Alertmanager's lab receiver intentionally has no external integrations;
-  the UI/API is the evidence surface for drill screenshots.
-- Schema Registry HTTP endpoint is unauthenticated inside the Compose
-  network (lab-only); Kafka listeners are fully secured in `up-secure` mode.
-- Non-functional targets (p99 < 200 ms at 1,000 msg/s; ≥ 5,000 msg/s ceiling)
-  are design targets until measured into `docs/performance/baseline.md`.
+- Security overlay (`make up-secure`) is written per ADR-0002 but its runtime mTLS/SCRAM handshake behaviour is not yet exercised on the secured stack; one calibration pass is budgeted.
+- JMX broker metrics ship as config (`monitoring/jmx/broker.yml`) but the broker javaagent wiring is documented, not enabled — the related alerts activate once wired.
+- Alertmanager's lab receiver intentionally has no external integrations; the UI/API is the evidence surface for drill screenshots.
+- Schema Registry HTTP endpoint is unauthenticated inside the Compose network (lab-only); Kafka listeners are fully secured in `up-secure` mode.
+- D5 (certificate expiry drill) requires the secured stack and is pending the `make up-secure` calibration pass.
+- Soak test (T14) not yet run — scheduled after secured stack validation.
 
 ## License
 

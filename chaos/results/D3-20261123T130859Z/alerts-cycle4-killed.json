@@ -1,0 +1,1 @@
+{"status":"success","data":{"alerts":[{"labels":{"alertname":"ConsumerLagHigh","consumergroup":"fraud-detector","severity":"warning"},"annotations":{"description":"Total lag is 83408 for 5m - consumers are falling behind (D3).","summary":"Consumer group fraud-detector lag above 1000"},"state":"firing","activeAt":"2026-11-23T12:58:08.125813709Z","value":"8.3408e+04"}]}}

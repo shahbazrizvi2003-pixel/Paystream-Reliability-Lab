@@ -1,0 +1,8 @@
+drill: D1
+started: 20261123T153004Z
+hypothesis: one broker down: election, no data loss, transparent client retry, clean catch-up
+host: Linux / x86_64
+result: PASS-expected
+root_cause: leader election moved partitions; acks=all producers continued because min.insync.replicas=2 held
+fix: none needed - recovery by restart; alert KafkaBrokerCountBelowExpected fired
+finished: 20261123T153143Z

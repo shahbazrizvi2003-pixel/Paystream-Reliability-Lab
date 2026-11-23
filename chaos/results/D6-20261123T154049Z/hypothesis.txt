@@ -1,0 +1,8 @@
+drill: D6
+started: 20261123T154049Z
+hypothesis: malformed records land in the DLQ with Document 03 headers while the consumer keeps running; replay re-injects the raw bytes
+host: Linux / x86_64
+result: PASS-expected
+root_cause: deserialization failure routed raw bytes to the DLQ with correct headers; consumer never stopped
+fix: runbook: docs/runbooks/dlq-replay.md; alert DlqBacklog covers the detection window
+finished: 20261123T154208Z

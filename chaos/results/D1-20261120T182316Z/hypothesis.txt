@@ -1,0 +1,4 @@
+drill: D1
+started: 20261120T182316Z
+hypothesis: one broker down: election, no data loss, transparent client retry, clean catch-up
+host: Linux / x86_64

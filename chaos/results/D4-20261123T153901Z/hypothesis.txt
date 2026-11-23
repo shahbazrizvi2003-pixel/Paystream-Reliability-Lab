@@ -1,0 +1,8 @@
+drill: D4
+started: 20261123T153901Z
+hypothesis: disk pressure degrades the broker; NodeDiskAlmostFull fires before hard failure; removal + retention reclaim restores service
+host: Linux / x86_64
+result: PASS-expected
+root_cause: disk pressure visible in node-exporter metrics before broker failure; retention bounds real growth
+fix: runbook: docs/runbooks/disk-full.md; alert NodeDiskAlmostFull fired
+finished: 20261123T154049Z

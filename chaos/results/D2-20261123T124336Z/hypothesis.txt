@@ -1,0 +1,4 @@
+drill: D2
+started: 20261123T124336Z
+hypothesis: two brokers down: metadata quorum loses its majority, acks=all producers block by design (min ISR 2), consumers on remaining leaders continue, ordered recovery restores full ISR
+host: Linux / x86_64
