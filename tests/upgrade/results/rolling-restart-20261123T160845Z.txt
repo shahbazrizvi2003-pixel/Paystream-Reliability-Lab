@@ -1,0 +1,11 @@
+T12 rolling restart - Mon Nov 23 16:08:45 UTC 2026, rate=100
+== T12 rolling restart ==
+baseline: {"failed":13075,"running":true,"sent":455187,"ratePerSecond":100}
+-- restarting kafka-1...
+kafka-1 rejoined; generator: {"failed":13075,"running":true,"sent":468597,"ratePerSecond":100}
+-- restarting kafka-2...
+kafka-2 rejoined; generator: {"failed":13075,"running":true,"sent":471867,"ratePerSecond":100}
+-- restarting kafka-3...
+kafka-3 rejoined; generator: {"failed":13075,"running":true,"sent":474257,"ratePerSecond":100}
+final: {"failed":13075,"running":true,"sent":477267,"ratePerSecond":100}
+== T12 PASS: all brokers restarted, quorum recovered, generator kept running ==
