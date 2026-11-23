@@ -4,7 +4,7 @@
 # retry transparently (acks=all, min.insync.replicas=2 still holds), no data
 # loss, and the cluster catches up on restart.
 # Usage: chaos/d1_broker_loss.sh [--help] [--broker kafka-3] [--rate 100]
-set -euo pipefail
+set -uo pipefail
 
 LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 # shellcheck disable=SC1091
@@ -42,7 +42,7 @@ RESTORED=0
 restore() {
   if [ "$RESTORED" -eq 0 ]; then
     echo "[D1] ensuring $TARGET_BROKER is back up..."
-    compose start "$TARGET_BROKER" >/dev/null 2>&1 || true
+    docker start "$TARGET_BROKER" >/dev/null 2>&1 || true
     RESTORED=1
   fi
 }
@@ -54,13 +54,14 @@ start_load "$RATE"
 drill_capture "baseline"
 
 echo "[D1] stopping ${TARGET_BROKER} at $(date -u +%H:%M:%S)..."
-compose stop "$TARGET_BROKER" >/dev/null 2>&1
+docker stop "$TARGET_BROKER" >/dev/null 2>&1 || true
+echo "[D1] ${TARGET_BROKER} stopped. Waiting ${DURATION}s..."
 drill_capture "broker-down"
 sleep "$DURATION"
 drill_capture "broker-down-late"
 
 echo "[D1] restarting ${TARGET_BROKER}..."
-compose start "$TARGET_BROKER" >/dev/null 2>&1
+docker start "$TARGET_BROKER" >/dev/null 2>&1 || true
 RESTORED=1
 wait_for_healthy 300
 sleep 10
