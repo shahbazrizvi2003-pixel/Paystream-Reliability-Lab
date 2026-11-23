@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
 # Drill D3 - consumer lag and rebalance storm (WP2.7, FR-12).
-# Hypothesis: member churn under load grows lag; CooperativeStickyAssignor
-# (ADR-0005) keeps the storms bounded - only affected partitions move, and
-# lag drains once membership stabilises.
-# Usage: chaos/d3_consumer_lag.sh [--help] [--cycles 4] [--rate 500]
-set -euo pipefail
+set -uo pipefail
 
 LIB="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
-# shellcheck disable=SC1091
 source "$LIB"
 
 CYCLES="${DRILL_CYCLES:-4}"
@@ -16,16 +11,10 @@ RATE="${DRILL_RATE:-500}"
 usage() {
   cat <<'EOF'
 D3 - notifier member churn under load: lag growth and cooperative rebalancing
-
-Joins and kills extra notifier instances repeatedly while traffic runs, so
-the 'notifier' group rebalances continuously. Watch the consumer-groups
-dashboard (members + lag) and the KafkaPartitionIsrBelowMinIsr-free lag
-recovery afterwards.
-
 Options:
   -h, --help    Show this help.
   --cycles N    Join/kill cycles (default: 4).
-  --rate N      Generator rate (default: 500 msg/s - high enough to build lag).
+  --rate N      Generator rate (default: 500 msg/s).
 EOF
 }
 
@@ -41,10 +30,11 @@ done
 require_cluster
 drill_init "D3" "rebalance storms grow lag but cooperative assignment bounds the damage; lag drains after membership stabilises"
 RESTORED=0
+ROGUE_PID=""
 restore() {
   if [ "$RESTORED" -eq 0 ]; then
     echo "[D3] ensuring no rogue consumer is left running..."
-    [ -n "${ROGUE_PID:-}" ] && kill "$ROGUE_PID" >/dev/null 2>&1 || true
+    [ -n "${ROGUE_PID}" ] && kill "$ROGUE_PID" >/dev/null 2>&1 || true
     RESTORED=1
   fi
 }
@@ -55,16 +45,10 @@ wait_for_healthy
 start_load "$RATE"
 drill_capture "baseline"
 
-# Member churn without compose scaling (services have fixed container names):
-# a rogue console consumer repeatedly joins and leaves the 'notifier' group,
-# forcing the real members through cooperative rebalances under load.
-# Auto-commit is disabled so the rogue never advances the group's offsets -
-# alerts it briefly owns are redelivered to the real notifier after it leaves.
 for i in $(seq 1 "$CYCLES"); do
   echo "[D3] cycle ${i}/${CYCLES}: rogue member joins the notifier group..."
-  # bootstrap args are appended by kafka_exec (mode-aware: 29092 plaintext /
-  # 29094 + command-config on the secured stack)
-  kafka_exec kafka-console-consumer.sh \
+  docker exec kafka-1 /opt/kafka/bin/kafka-console-consumer.sh \
+    --bootstrap-server localhost:29092 \
     --group notifier --topic bank.fraud-alerts.v1 --timeout-ms 20000 \
     --consumer-property enable.auto.commit=false \
     >/dev/null 2>&1 &
@@ -72,7 +56,7 @@ for i in $(seq 1 "$CYCLES"); do
   sleep 20
   drill_capture "cycle${i}-joined"
 
-  echo "[D3] cycle ${i}/${CYCLES}: rogue member leaves (kill)..."
+  echo "[D3] cycle ${i}/${CYCLES}: rogue member leaves..."
   kill "$ROGUE_PID" >/dev/null 2>&1 || true
   wait "$ROGUE_PID" 2>/dev/null || true
   ROGUE_PID=""
